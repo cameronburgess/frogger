@@ -1,0 +1,12 @@
+module text(clk,rst,win_text,game_over_text);
+input clk,rst;
+output win_text,game_over_text;
+
+
+
+
+
+
+
+
+endmodule

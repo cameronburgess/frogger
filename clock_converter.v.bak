@@ -1,0 +1,25 @@
+module Clks_Generator(board_clk,update,clk);
+	input board_clk;
+	output reg update,clk;
+	reg [21:0]count;	
+	reg q;
+
+	always@(posedge board_clk)
+	begin
+		count <= count + 1;
+		if(count == 2000000)
+		begin
+			update <= ~update;
+			count <= 0;
+		end	
+	end
+	
+	
+	always@(posedge board_clk)
+	begin
+		q <= ~q; 
+		clk <= q;
+	end
+	
+	
+endmodule

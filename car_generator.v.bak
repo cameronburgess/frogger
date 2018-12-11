@@ -1,0 +1,7 @@
+module car_generator (clk,rst,xCount,yCount,car);
+
+
+
+
+
+endmodule 

@@ -1,0 +1,55 @@
+module player_frog(update,start,clk,frog,xCount,yCount,x,y,z,w,h);
+	input update , start,clk,xCount,yCount,x,y,w,z,h;
+	wire reset ;
+	output  frog;
+	reg [9:0] frogX[0:31];
+	reg [8:0] frogY[0:31];
+
+	integer   count3;
+	reg frog;
+	
+	wire [9:0] xCount;
+	wire [9:0] yCount;
+	wire [2:0] direction;
+	
+//controlling the frog (hopefully)
+Controller cont(x,y,z,w,h, direction, reset);
+
+always@(posedge update)
+	begin
+		if(start)
+			begin				
+				case(direction)
+					3'b001: frogY[0] <= (frogY[0] - 10);
+					3'b010: frogX[0] <= (frogX[0] - 10);
+					3'b011: frogY[0] <= (frogY[0] + 10);
+					3'b100: frogX[0] <= (frogX[0] + 10);
+					3'b111:begin frogX[0] <= frogX[0];
+					frogY[0] <= frogY[0]; end 
+				endcase	
+			end
+		else
+			begin
+				for(count3 = 1; count3 < 32; count3 = count3+1)
+					begin
+						frogX[count3] = 700;
+						frogY[count3] = 500;
+					end
+					frogX[0] = 300;
+					frogY[0] = 300;
+			end
+	end
+//	
+	
+	
+	
+	
+
+	
+always@(posedge clk) //controls the size of the frog
+	begin	
+		frog = (xCount > frogX[0] && xCount < (frogX[0]+10)) && (yCount > frogY[0] && yCount < (frogY[0]+10));
+	end
+	
+
+endmodule 

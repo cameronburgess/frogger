@@ -1,0 +1,207 @@
+module keyboard (key_clk, keydata, rst, up, down, left, right, stay);
+input key_clk; //clock from keyboard
+wire key_clk;
+input keydata; //input keydata from keyboard
+wire keydata;
+output up, down, left, right, stay; //LED's for now
+reg up, down, left, right, stay;
+
+output rst; //the reset signal will come from the spacebar, and is active-high (but can be changed)
+reg rst;
+
+//keyboard data translation into something I can use
+reg [7:0] data_curr;
+reg [7:0] data_pre;
+reg [3:0] b;
+reg flag; 
+reg [7:0] key;
+
+initial
+begin
+b <= 4'h1;
+flag <= 1'b0;
+data_curr <= 8'h29;
+data_pre <= 8'h29;
+key <= 8'h29;
+end
+
+always @(negedge key_clk) //Activating at negative edge of clock from keyboard
+	begin
+		case(b)
+			4'd1:; //first bit
+			4'd2:data_curr[0] <= keydata;
+			4'd3:data_curr[1] <= keydata;
+			4'd4:data_curr[2] <= keydata;
+			4'd5:data_curr[3] <= keydata;
+			4'd6:data_curr[4] <= keydata;
+			4'd7:data_curr[5] <= keydata;
+			4'd8:data_curr[6] <= keydata;
+			4'd9:data_curr[7] <= keydata;
+			4'd10:flag <= 1'b1; //Parity bit
+			4'd11:flag <= 1'b0; //Ending bit
+		endcase
+		if(b <= 4'd10)
+			b <= b + 4'd1;
+		else if(b == 4'd11)
+			b <= 4'd1;
+	end
+	
+always@(posedge flag) // Printing data obtained to key for a short time, then changing key back to nomove
+	begin
+		if(data_curr == 8'hf0)
+			begin
+				lag_e <= 1'b1;
+				
+				if (lag <= 8'hff)
+					key <= data_pre;
+				else
+					key <= 8'h01;
+			end
+		else
+			begin
+				lag_e <= 1'b0;
+				key <= 8'h01;
+				data_pre <= data_curr;
+			end
+	end
+
+reg lag_e;
+reg [7:0]lag;
+
+always @(posedge key_clk)
+	begin
+		if (lag_e == 1'b1)
+			lag <= lag + 8'h01;
+		else
+			lag <= 8'h00;
+	end
+//
+
+//assigning the reset value
+always @(posedge key_clk)
+	begin
+		if (key == 8'h29)
+			rst = 1'b1;
+		else
+			rst = 1'b0;
+	end
+//
+
+// interpreting the data from the keyboard as control signals for the frog
+
+localparam upkey = 8'h1D, downkey = 8'h1B, leftkey = 8'h1C, rightkey = 8'h23, nomove = 8'h01;
+
+reg [7:0]S;
+reg [7:0]NS;
+
+always @(posedge key_clk) //state updater
+	begin
+		if (rst == 1'b1)
+			S <= nomove;
+		else
+			S <= NS;
+	end
+
+always @(*) //NS calculator
+	case(S)
+		nomove:
+			if (key == nomove)
+				NS = nomove;
+			else if (key == upkey)
+				NS = upkey;
+			else if (key == downkey)
+				NS = downkey;
+			else if (key == leftkey)
+				NS = leftkey;
+			else if (key == rightkey)
+				NS = rightkey;
+			else
+				NS = nomove;
+				
+		upkey:
+			if (key == upkey)
+				NS = upkey;
+			else
+				NS = nomove;
+				
+		downkey:
+			if (key == downkey)
+				NS = downkey;
+			else
+				NS = nomove;
+				
+		leftkey:
+			if (key == leftkey)
+				NS = leftkey;
+			else
+				NS = nomove;
+				
+		rightkey:
+			if (key == rightkey)
+				NS = rightkey;
+			else
+				NS = nomove;
+		default:
+				NS = nomove;
+	endcase
+
+
+
+always @(posedge key_clk) //output calculator 
+	begin
+		if (rst == 1'b1)
+			begin
+				up <= 1'b0;
+				down <= 1'b0;
+				left <= 1'b0;
+				right <= 1'b0;
+				stay <= 1'b1;
+			end
+		else
+			case(S)
+				upkey:
+					begin
+						up <= 1'b1;
+						down <= 1'b0;
+						left <= 1'b0;
+						right <= 1'b0;
+						stay <= 1'b0;
+					end
+				downkey:
+					begin
+						up <= 1'b0;
+						down <= 1'b1;
+						left <= 1'b0;
+						right <= 1'b0;
+						stay <= 1'b0;
+					end
+				leftkey:
+					begin
+						up <= 1'b0;
+						down <= 1'b0;
+						left <= 1'b1;
+						right <= 1'b0;
+						stay <= 1'b0;
+					end
+				rightkey:
+					begin
+						up <= 1'b0;
+						down <= 1'b0;
+						left <= 1'b0;
+						right <= 1'b1;
+						stay <= 1'b0;
+					end
+				nomove:
+					begin
+						up <= 1'b0;
+						down <= 1'b0;
+						left <= 1'b0;
+						right <= 1'b0;
+						stay <= 1'b1;
+					end
+			endcase
+	end
+//
+
+endmodule
+	
