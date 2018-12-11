@@ -1,0 +1,14 @@
+
+State Machine - |frogger|collision:WL|S
+Name S.alive S.loser S.winner 
+S.alive 0 0 0 
+S.winner 1 0 1 
+S.loser 1 1 0 
+
+State Machine - |frogger|player_frog:froggy|S
+Name S.move_up S.move_right S.move_left S.move_down S.dont_move 
+S.dont_move 0 0 0 0 0 
+S.move_down 0 0 0 1 1 
+S.move_left 0 0 1 0 1 
+S.move_right 0 1 0 0 1 
+S.move_up 1 0 0 0 1 
