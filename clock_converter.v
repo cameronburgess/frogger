@@ -1,8 +1,8 @@
 module clock_converter(board_clk,update,clk);
-	input board_clk;
-	output reg update,clk;
-	reg [21:0]count;	
-	reg a;
+input board_clk;
+output reg update,clk;
+reg [21:0]count;	
+reg a;
 	
 //the update clock is for controlling how fast the frog and car positions update
 always@(posedge board_clk)
